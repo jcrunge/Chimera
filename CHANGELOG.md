@@ -2,6 +2,21 @@
 
 Todos los cambios notables del proyecto **Sistema de Jarvis** serán documentados en este archivo.
 
+## [v0.4.0] - Biblioteca de Chips Swappable + Protocolo Estructurado
+
+### Añadido (Added)
+- **Biblioteca swappable de Chips Cognitivos**: Nuevo `indexador_chips.py` que indexa todos los chips de `Chips_Cognitivos/` en una colección ChromaDB independiente (`indice_chips`). El `Planner` ahora consulta el índice por similaridad semántica y, por cada paso, instala los chips relevantes ENCIMA del chip base del agente (analogía Matrix: "load skills on demand"). Esto rescata los 11 chips huérfanos (`chip_filosofia`, `chip_red_team`, `chip_experto_python`, etc.) que antes nunca se cargaban.
+- **Metadata declarativa (`Chips_Cognitivos/_metadata.json`)**: descripción, keywords, `requiere_autorizacion` y `modo` (`inline` | `rag`) por chip. Los book-chips grandes (`chip_teoria_musical`, `chip_linux_master`) se indexan solo por descripción y su contenido se trae por RAG bajo demanda.
+- **Gate de chips autorizados**: chips marcados `requiere_autorizacion: true` (ej. `chip_red_team`) requieren un umbral de similaridad más alto (`0.65` vs `0.45` para chips normales) — solo se instalan cuando la tarea del usuario lo pide semánticamente.
+- **Helpers `buscar_chips_relevantes` y `cargar_chip_completo`** en `herramientas.py`.
+
+### Modificado (Changed)
+- **Protocolo estructurado de evaluadores**: `tester`, `citation` y `investigador` ahora terminan su salida con `<resultado>EXITO|FALLO|INCOMPLETO</resultado>`. El harness parsea ese token con `_extraer_resultado()` en vez de hacer matching por substring. Esto cierra la contradicción documentada en `CLAUDE.md` (`EXITO` vs `EXITO_TOTAL`).
+- **`crear_neurona(tipo, chips_extra=None, tarea_contextual="")`**: nuevo parámetro `chips_extra` para layer de chips encima del chip base sin romper el comportamiento por defecto.
+- **`config_jarvis.json`**: nuevos campos `umbral_chip_normal`, `umbral_chip_autorizado`, `max_chips_por_paso`.
+
+---
+
 ## [v0.2.0] - Evolución Multi-Agente y Sandbox Real
 
 ### Añadido (Added)

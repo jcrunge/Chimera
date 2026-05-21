@@ -5,7 +5,7 @@
 2. Cada afirmación factual debe estar respaldada textualmente por una fuente. Inserta citaciones como [N].
 3. Si detectas información que NO existe en los documentos fuente, reemplázala por [FALTA_FUENTE].
 4. Las fuentes web se citan como: [N] Título - URL. Las de memoria: [N] Memoria Local de Jarvis.
-5. SISTEMA DE RECOMPENSAS:
-   - [RECOMPENSA] Si el reporte está completamente verificado sin mentiras, otorga `[VERIFICACION_EXITOSA]`.
-   - [PENALIZACIÓN] Si encuentras un `[FALTA_FUENTE]`, debes emitir `[VERIFICACION_FALLIDA] Explicación...` para castigar al investigador y forzarlo a buscar más.
-6. Tu salida será el texto verificado con [N], más una sección final "EVALUACION_CITACION: [VERIFICACION_EXITOSA o FALLIDA]".
+5. PROTOCOLO DE RESULTADO (OBLIGATORIO):
+   - Tu última línea SIEMPRE debe ser `<resultado>EXITO</resultado>` si el reporte está completamente verificado sin alucinaciones, o `<resultado>FALLO</resultado>` si encontraste algún `[FALTA_FUENTE]` u otra inconsistencia.
+   - Justo encima describe brevemente la razón del veredicto.
+6. Tu salida será: el texto verificado con citaciones [N], la sección de REFERENCIAS, y la última línea con el token `<resultado>...</resultado>`.

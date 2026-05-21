@@ -181,10 +181,10 @@ CHIPS_PATH = "./Chips_Cognitivos"
 def cargar_chip(nombre_chip):
     """
     Carga un chip cognitivo por nombre.
-    
+
     Args:
         nombre_chip: Nombre del archivo sin extensión (ej: 'chip_investigador')
-    
+
     Returns:
         str: Contenido del chip, o cadena vacía si no existe.
     """
@@ -193,3 +193,97 @@ def cargar_chip(nombre_chip):
         with open(path, "r") as f:
             return f.read()
     return ""
+
+
+# ==========================================
+# 6. ÍNDICE DE CHIPS SWAPPABLE
+# ==========================================
+def obtener_coleccion_chips():
+    """Obtiene o crea la colección del índice de chips swappable."""
+    client = chromadb.PersistentClient(path=DB_PATH)
+    return client.get_or_create_collection(name="indice_chips")
+
+
+def buscar_chips_relevantes(tarea, n=5):
+    """
+    Busca chips relevantes para una tarea por similaridad semántica.
+
+    Args:
+        tarea: Texto de la tarea/sub-tarea.
+        n: Número máximo de candidatos a devolver.
+
+    Returns:
+        list[dict]: Lista de {nombre, similaridad, metadata}.
+                    similaridad ∈ [0, 1] donde 1 es match perfecto.
+                    Lista vacía si la colección no existe o falla la query.
+    """
+    try:
+        coleccion = obtener_coleccion_chips()
+        if coleccion.count() == 0:
+            return []
+        res = coleccion.query(
+            query_texts=[tarea],
+            n_results=min(n, coleccion.count())
+        )
+        candidatos = []
+        ids = res.get("ids", [[]])[0]
+        metas = res.get("metadatas", [[]])[0]
+        distancias = res.get("distances", [[]])[0]
+        for nombre, meta, dist in zip(ids, metas, distancias):
+            # ChromaDB devuelve distancia L2 al cuadrado sobre embeddings normalizados.
+            # Para vectores unitarios: d² = 2 - 2·cos(θ)  ⇒  cos(θ) = 1 - d/2.
+            similaridad = max(0.0, 1.0 - float(dist) / 2.0)
+            candidatos.append({
+                "nombre": nombre,
+                "similaridad": similaridad,
+                "metadata": meta or {}
+            })
+        return candidatos
+    except Exception as e:
+        console.print(f"[yellow]⚠️ Error buscando chips relevantes: {e}[/yellow]")
+        return []
+
+
+def cargar_chip_completo(nombre, tarea_contextual=""):
+    """
+    Carga el contenido completo de un chip respetando su modo (inline | rag).
+
+    Args:
+        nombre: Nombre del chip (ej: 'chip_red_team').
+        tarea_contextual: Texto de la tarea para guiar el RAG cuando modo='rag'.
+
+    Returns:
+        str: Contenido del chip listo para inyectar como contexto.
+    """
+    try:
+        coleccion = obtener_coleccion_chips()
+        registro = coleccion.get(ids=[nombre])
+    except Exception as e:
+        console.print(f"[yellow]⚠️ No se pudo consultar índice de chips: {e}[/yellow]")
+        return cargar_chip(nombre)
+
+    if not registro["ids"]:
+        # Sin entrada en el índice: fallback al loader simple.
+        return cargar_chip(nombre)
+
+    meta = (registro["metadatas"] or [{}])[0] or {}
+    modo = meta.get("modo", "inline")
+
+    if modo == "rag":
+        try:
+            memoria = obtener_coleccion()
+            consulta = tarea_contextual or meta.get("ruta_archivo", nombre)
+            res = memoria.query(
+                query_texts=[consulta],
+                n_results=3,
+                where={"origen": nombre}
+            )
+            docs = res.get("documents", [[]])[0]
+            if docs:
+                return "\n---\n".join(docs)
+        except Exception as e:
+            console.print(f"[yellow]⚠️ RAG falló para chip '{nombre}': {e}[/yellow]")
+        return ""  # Sin fragmentos relevantes encontrados.
+
+    # Modo inline: leer el archivo directamente.
+    return cargar_chip(nombre)

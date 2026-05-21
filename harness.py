@@ -10,6 +10,7 @@ import os
 os.environ.setdefault("OBJC_DISABLE_INITIALIZE_FORK_SAFETY", "YES")
 
 import json
+import re
 import time
 import multiprocessing as mp
 from rich.console import Console
@@ -18,10 +19,10 @@ from mlx_lm import load
 
 from neuronas import crear_neurona
 from herramientas import (
-    buscar_memoria, guardar_en_memoria, 
+    buscar_memoria, guardar_en_memoria,
     buscar_web, formatear_resultados_web,
     ejecutar_en_sandbox, leer_archivo, listar_workspace,
-    cargar_chip
+    cargar_chip, buscar_chips_relevantes
 )
 
 console = Console()
@@ -40,7 +41,10 @@ def cargar_config():
         "max_tokens_codigo": 2000,
         "max_intentos_correccion": 3,
         "max_iteraciones_investigacion": 5,
-        "temperatura": 0.1
+        "temperatura": 0.1,
+        "umbral_chip_normal": 0.35,
+        "umbral_chip_autorizado": 0.40,
+        "max_chips_por_paso": 2
     }
     if os.path.exists(CONFIG_FILE):
         try:
@@ -118,6 +122,64 @@ class JarvisHarness:
         console.print("[yellow]🔀 Fallback: Tarea interpretada como INVESTIGACION simple.[/yellow]")
         return [{"tipo": "INVESTIGACION", "tarea": tarea}]
 
+    # ------------------------------------------
+    # HELPERS: Chips swappable y parsing de resultado
+    # ------------------------------------------
+    _RE_RESULTADO = re.compile(r"<resultado>\s*(EXITO|FALLO|INCOMPLETO)\s*</resultado>", re.IGNORECASE)
+
+    def _extraer_resultado(self, texto):
+        """Extrae el token estructurado <resultado>...</resultado> de la salida de un evaluador.
+
+        Returns:
+            'EXITO' | 'FALLO' | 'INCOMPLETO' (uppercase) o None si no hay match.
+        """
+        if not texto:
+            return None
+        match = self._RE_RESULTADO.search(texto)
+        return match.group(1).upper() if match else None
+
+    def _seleccionar_chips(self, sub_tarea):
+        """Consulta el índice ChromaDB y devuelve los nombres de chips a instalar.
+
+        Reglas:
+        - similaridad >= umbral_chip_normal para chips sin requiere_autorizacion.
+        - similaridad >= umbral_chip_autorizado para chips con requiere_autorizacion=True.
+        - Máximo max_chips_por_paso chips por paso.
+        """
+        candidatos = buscar_chips_relevantes(sub_tarea, n=5)
+        if not candidatos:
+            return []
+        umbral_normal = self.config.get("umbral_chip_normal", 0.45)
+        umbral_auth = self.config.get("umbral_chip_autorizado", 0.65)
+        max_chips = self.config.get("max_chips_por_paso", 3)
+        seleccionados = []
+        for c in candidatos:
+            meta = c.get("metadata", {}) or {}
+            requiere_auth = bool(meta.get("requiere_autorizacion", False))
+            umbral = umbral_auth if requiere_auth else umbral_normal
+            if c["similaridad"] >= umbral:
+                seleccionados.append(c["nombre"])
+            if len(seleccionados) >= max_chips:
+                break
+        if seleccionados:
+            console.print(f"[bold cyan]🧬 Chips instalados para este paso: {seleccionados}[/bold cyan]")
+        return seleccionados
+
+    def _modelo_para_tipo(self, tipo):
+        """Devuelve el par (modelo, tokenizer) correcto según el tipo de agente."""
+        if tipo in ("planner", "investigador", "sintetizador"):
+            return self.modelo_orq, self.tokenizer_orq
+        return self.modelo_worker, self.tokenizer_worker
+
+    def _neurona_con_chips(self, tipo, chips_extra, tarea_contextual=""):
+        """Devuelve la neurona pre-creada si no hay chips_extra; si los hay, reconstruye."""
+        if not chips_extra:
+            return getattr(self, tipo)
+        neurona = crear_neurona(tipo, chips_extra=chips_extra, tarea_contextual=tarea_contextual)
+        modelo, tokenizer = self._modelo_para_tipo(tipo)
+        neurona.set_modelo(modelo, tokenizer)
+        return neurona
+
     def limpiar_query(self, query):
         import re
         query = query.strip()
@@ -164,14 +226,17 @@ class JarvisHarness:
             tarea_con_contexto = sub_tarea
             if contexto_global:
                 tarea_con_contexto = f"CONTEXTO DE PASOS ANTERIORES:\n{contexto_global}\n\nNUEVA TAREA:\n{sub_tarea}"
-            
+
+            # Seleccionar chips swappable relevantes para este paso
+            chips_para_paso = self._seleccionar_chips(sub_tarea)
+
             # Ejecutar el flujo correspondiente
             if tipo == "INVESTIGACION":
-                resultado_paso = self._flujo_investigacion(tarea_con_contexto)
+                resultado_paso = self._flujo_investigacion(tarea_con_contexto, chips_extra=chips_para_paso)
             elif tipo == "CODIGO":
-                resultado_paso = self._flujo_codigo(tarea_con_contexto)
+                resultado_paso = self._flujo_codigo(tarea_con_contexto, chips_extra=chips_para_paso)
             elif tipo == "AUDITORIA":
-                resultado_paso = self._flujo_auditoria(tarea_con_contexto)
+                resultado_paso = self._flujo_auditoria(tarea_con_contexto, chips_extra=chips_para_paso)
             else:
                 resultado_paso = self._flujo_chat(tarea_con_contexto)
                 
@@ -193,41 +258,45 @@ class JarvisHarness:
     # ------------------------------------------
     # FLUJO: INVESTIGACIÓN
     # ------------------------------------------
-    def _flujo_investigacion(self, tarea):
+    def _flujo_investigacion(self, tarea, chips_extra=None):
         """
         Flujo de investigación iterativa con Bucle de Persistencia y Verificación Estricta.
         """
         console.rule("[bold cyan]Modo: INVESTIGACIÓN")
-        
+
+        investigador = self._neurona_con_chips("investigador", chips_extra, tarea_contextual=tarea)
+        sintetizador = self.sintetizador
+        citation = self.citation
+
         hallazgos = []
         fuentes = []
         sintesis = ""
         reporte_final = ""
-        
+
         for iteracion in range(1, self.config["max_iteraciones_investigacion"] + 1):
             console.print(f"\n[bold magenta]🔄 Iteración {iteracion}[/bold magenta]")
-            
+
             # 1. Construir contexto con hallazgos previos
             contexto_previo = ""
             if hallazgos:
                 contexto_previo = f"\nHALLAZGOS PREVIOS:\n" + "\n".join(hallazgos[-3:])  # últimos 3
-            
+
             # 2. Buscar en memoria local (ChromaDB)
             contexto_memoria = buscar_memoria(tarea)
             if contexto_memoria:
                 console.print("[green]💾 Encontrado conocimiento en memoria local[/green]")
                 hallazgos.append(f"[Memoria Local] {contexto_memoria[:500]}")
                 fuentes.append({"tipo": "memoria_local", "contenido": contexto_memoria[:200]})
-            
+
             # 3. Generar query de búsqueda web con el investigador
-            query_web_raw = self.investigador.pensar(
+            query_web_raw = investigador.pensar(
                 f"Genera únicamente los términos de búsqueda (query) que usarías en Google/DuckDuckGo para investigar sobre: {tarea}. No agregues introducciones, explicaciones, ni comillas.",
                 contexto=contexto_previo,
                 max_tokens=50
             )
             query_web = self.limpiar_query(query_web_raw)
             console.print(f"[bold cyan]🔍 Query de búsqueda limpia: '{query_web}'[/bold cyan]")
-            
+
             # 4. Buscar en web
             resultados_web = buscar_web(query_web, max_resultados=3)
             if resultados_web:
@@ -235,40 +304,40 @@ class JarvisHarness:
                 hallazgos.append(f"[Web] {texto_web[:500]}")
                 for r in resultados_web:
                     fuentes.append({"tipo": "web", "url": r.get("href", r.get("url", "")), "titulo": r.get("title", "")})
-            
+
             # 5. Sintetizar todo
             todo_el_contexto = "\n---\n".join(hallazgos)
-            sintesis = self.sintetizador.pensar(
+            sintesis = sintetizador.pensar(
                 f"Sintetiza toda la información recopilada para responder: {tarea}",
                 contexto=f"INFORMACIÓN RECOPILADA:\n{todo_el_contexto}"
             )
-            
+
             # 6. Evaluar si necesitamos más investigación (Investigador)
-            evaluacion = self.investigador.pensar(
-                f"¿La siguiente síntesis responde COMPLETAMENTE a la pregunta '{tarea}'? Responde SOLO 'COMPLETO' o 'INCOMPLETO: [qué falta]'.",
+            evaluacion = investigador.pensar(
+                f"¿La siguiente síntesis responde COMPLETAMENTE a la pregunta '{tarea}'? Aplica el PROTOCOLO DE EVALUACIÓN DE COMPLETITUD: termina con `<resultado>EXITO</resultado>` o `<resultado>INCOMPLETO</resultado>` con explicación encima.",
                 contexto=f"SÍNTESIS:\n{sintesis}",
-                max_tokens=100
+                max_tokens=200
             )
-            
-            if "INCOMPLETO" in evaluacion.upper() or "COMPLETO" not in evaluacion.upper():
-                console.print(f"[yellow]🔄 Investigación incompleta: {evaluacion[:100]}[/yellow]")
+
+            if self._extraer_resultado(evaluacion) != "EXITO":
+                console.print(f"[yellow]🔄 Investigación incompleta: {evaluacion[:120]}[/yellow]")
                 hallazgos.append(f"[PENALIZACIÓN] Tu investigación previa fue evaluada como INCOMPLETA. Razón: {evaluacion}. Busca de nuevo enfocándote en lo que falta.")
                 continue
-                
+
             # 7. Verificación Estricta (Citation Agent)
             console.print("[bold yellow]⚖️ CitationAgent verificando fuentes...[/bold yellow]")
-            
+
             str_fuentes = ""
             for i, f in enumerate(fuentes, 1):
                 str_fuentes += f"[{i}] {f.get('titulo', 'Local')} - {f.get('url', 'Memoria')}\n"
-                
-            verificacion = self.citation.pensar(
-                f"Verifica la siguiente síntesis e insértale citaciones numéricas [N] respaldadas por las fuentes. Si hay datos inventados o sin fuente, pon [FALTA_FUENTE]. Al final evalúa tu propio trabajo con [VERIFICACION_EXITOSA] o [VERIFICACION_FALLIDA].\n\nSÍNTESIS:\n{sintesis}",
+
+            verificacion = citation.pensar(
+                f"Verifica la siguiente síntesis e insértale citaciones numéricas [N] respaldadas por las fuentes. Si hay datos inventados o sin fuente, pon [FALTA_FUENTE]. Aplica el PROTOCOLO DE RESULTADO: termina con `<resultado>EXITO</resultado>` o `<resultado>FALLO</resultado>`.\n\nSÍNTESIS:\n{sintesis}",
                 contexto=f"FUENTES DISPONIBLES:\n{str_fuentes}\n\nTEXTO RECOPILADO:\n{todo_el_contexto}",
                 max_tokens=1500
             )
-            
-            if "[VERIFICACION_FALLIDA]" in verificacion.upper() or "[FALTA_FUENTE]" in verificacion.upper():
+
+            if self._extraer_resultado(verificacion) != "EXITO":
                 console.print("[bold red]❌ Alucinación o falta de fuentes detectada por CitationAgent.[/bold red]")
                 hallazgos.append(f"[PENALIZACIÓN] El CitationAgent detectó afirmaciones sin fuente verificable. Busca pruebas sólidas para las afirmaciones faltantes.")
                 continue
@@ -291,59 +360,62 @@ class JarvisHarness:
     # ------------------------------------------
     # FLUJO: CÓDIGO (hereda lógica del motor_neuronal original)
     # ------------------------------------------
-    def _flujo_codigo(self, tarea):
+    def _flujo_codigo(self, tarea, chips_extra=None):
         """
         Flujo de generación y ejecución de código.
         Coder genera → Docker ejecuta → Tester evalúa → repite si falla.
         Si falla varias veces, descompone el problema automáticamente.
         """
         console.rule("[bold green]Modo: CÓDIGO")
-        
+
+        coder = self._neurona_con_chips("coder", chips_extra, tarea_contextual=tarea)
+        tester = self.tester
+
         from docker_sandbox import DockerSandbox
         sandbox = DockerSandbox()
         archivos = listar_workspace()
         feedback = ""
         fallos_consecutivos = 0
-        
+
         for intento in range(1, self.config["max_intentos_correccion"] + 1):
             console.print(f"\n[bold]Ciclo {intento}/{self.config['max_intentos_correccion']}[/bold]")
-            
+
             # Contexto
             contexto = buscar_memoria(tarea)
             if feedback:
                 contexto += f"\nFEEDBACK ANTERIOR: {feedback}\n"
-                
+
             # Descomposición Automática si hay muchos fallos
             if fallos_consecutivos >= 2:
                 console.print("[bold yellow]⚠️ Múltiples fallos detectados. Descomponiendo el problema automáticamente...[/bold yellow]")
                 descomposicion = self.investigador.pensar(f"El código para '{tarea}' ha fallado {fallos_consecutivos} veces. Descompón este problema en 3 pasos lógicos y extremadamente simples para el programador. No escribas código, solo la estrategia paso a paso.")
                 contexto += f"\n[NUEVA ESTRATEGIA (DESCOMPOSICIÓN)]:\n{descomposicion}\nSigue esta estrategia paso a paso."
                 fallos_consecutivos = 0 # Reiniciar contador
-                
+
             contexto += f"\nArchivos disponibles en workspace: {archivos}"
-            
+
             # Coder genera código
-            codigo = self.coder.pensar(tarea, contexto=contexto, max_tokens=self.config["max_tokens_codigo"])
-            
+            codigo = coder.pensar(tarea, contexto=contexto, max_tokens=self.config["max_tokens_codigo"])
+
             # Ejecutar en sandbox
             exito, salida = sandbox.ejecutar_codigo(codigo)
             console.print(f"[cyan]📄 Salida Docker:[/cyan]\n{salida[:500]}")
-            
+
             # Tester evalúa
-            eval_qa = self.tester.pensar(
-                f"Tarea original: {tarea}\nSalida del programa:\n{salida}\nError: {'Ninguno' if exito else salida}\nRecuerda: Si es correcto, di EXITO_TOTAL. Si falla, di FALLO: [razon]."
+            eval_qa = tester.pensar(
+                f"Tarea original: {tarea}\nSalida del programa:\n{salida}\nError: {'Ninguno' if exito else salida}\nAplica el PROTOCOLO DE RESULTADO: termina con `<resultado>EXITO</resultado>` o `<resultado>FALLO</resultado>`."
             )
-            
-            if "EXITO" in eval_qa.upper() and exito:
+
+            if self._extraer_resultado(eval_qa) == "EXITO" and exito:
                 console.print("[bold green]🏆 [RECOMPENSA] CÓDIGO COMPLETADO CON ÉXITO Y SIN ERRORES.[/bold green]")
                 sandbox.apagar()
                 return f"Código ejecutado exitosamente.\nSalida:\n{salida}"
-            
+
             console.print(f"[bold red]❌ [PENALIZACIÓN] El código no cumplió los requisitos. Evaluador dice: {eval_qa[:100]}...[/bold red]")
             feedback = f"[PENALIZACIÓN] Tu código anterior falló. El tester reporta: {eval_qa}. Analiza tu error y arréglalo."
             fallos_consecutivos += 1
             time.sleep(1)
-        
+
         sandbox.apagar()
         return f"No se logró completar la tarea después de {self.config['max_intentos_correccion']} intentos.\nÚltimo feedback: {feedback}"
     
@@ -363,10 +435,12 @@ class JarvisHarness:
     # ------------------------------------------
     # FLUJO: AUDITORÍA
     # ------------------------------------------
-    def _flujo_auditoria(self, tarea):
+    def _flujo_auditoria(self, tarea, chips_extra=None):
         """Audita un archivo del workspace."""
         console.rule("[bold red]Modo: AUDITORÍA")
-        
+
+        investigador = self._neurona_con_chips("investigador", chips_extra, tarea_contextual=tarea)
+
         # Intentar extraer nombre de archivo de la tarea
         archivos = listar_workspace()
         archivo_encontrado = None
@@ -374,15 +448,15 @@ class JarvisHarness:
             if archivo.lower() in tarea.lower():
                 archivo_encontrado = archivo
                 break
-        
+
         if archivo_encontrado:
             contenido = leer_archivo(archivo_encontrado)
-            respuesta = self.investigador.pensar(
+            respuesta = investigador.pensar(
                 f"Audita este código/archivo y reporta problemas, vulnerabilidades y mejoras:\n{contenido[:2000]}",
                 contexto=f"Tarea del usuario: {tarea}"
             )
         else:
-            respuesta = self.investigador.pensar(
+            respuesta = investigador.pensar(
                 f"El usuario pide una auditoría pero no se encontró un archivo específico. Archivos disponibles: {archivos}\nPregunta: {tarea}"
             )
         

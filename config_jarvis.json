@@ -5,5 +5,8 @@
     "max_tokens_codigo": 2000,
     "max_intentos_correccion": 3,
     "max_iteraciones_investigacion": 5,
-    "temperatura": 0.1
+    "temperatura": 0.1,
+    "umbral_chip_normal": 0.35,
+    "umbral_chip_autorizado": 0.40,
+    "max_chips_por_paso": 2
 }

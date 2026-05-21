@@ -1,0 +1,98 @@
+{
+  "chip_auditor_datos": {
+    "descripcion": "Auditor de coherencia de datos: verifica que inputs y outputs sean lógicamente consistentes, detecta errores de estado de bucle y datos cruzados entre elementos de una lista.",
+    "keywords": ["auditoría", "integridad", "validación", "coherencia", "estado de bucle", "datos"],
+    "requiere_autorizacion": false,
+    "modo": "inline"
+  },
+  "chip_biblioteca": {
+    "descripcion": "Mapa de la memoria local: índice de los libros asimilados en ChromaDB para guiar búsquedas en memoria local.",
+    "keywords": ["biblioteca", "memoria local", "libros", "índice"],
+    "requiere_autorizacion": false,
+    "modo": "inline"
+  },
+  "chip_citation": {
+    "descripcion": "Auditor de fuentes y citaciones: verifica que cada afirmación tenga respaldo textual en las fuentes provistas.",
+    "keywords": ["citation", "fuentes", "referencias", "verificación"],
+    "requiere_autorizacion": false,
+    "modo": "inline"
+  },
+  "chip_coder": {
+    "descripcion": "Reglas de generación de código Python para el agente Coder-X.",
+    "keywords": ["código", "python", "programación", "coder"],
+    "requiere_autorizacion": false,
+    "modo": "inline"
+  },
+  "chip_experto_audio_ia": {
+    "descripcion": "Experto en IA de audio: uso de Whisper para transcripción forzada al español, Mutagen para metadatos FLAC y Librosa para tonalidad y BPM.",
+    "keywords": ["audio", "whisper", "mutagen", "librosa", "transcripción", "flac", "tonalidad", "bpm"],
+    "requiere_autorizacion": false,
+    "modo": "inline"
+  },
+  "chip_experto_python": {
+    "descripcion": "Mentor Senior de Python: clean code, PEP 8, type hinting, list comprehensions, optimización y revisión de código pythonic.",
+    "keywords": ["python", "pep8", "clean code", "type hint", "refactor", "pythonic"],
+    "requiere_autorizacion": false,
+    "modo": "inline"
+  },
+  "chip_filosofia": {
+    "descripcion": "Filósofo analítico experto en lógica formal: tablas de verdad, silogismos, paradojas, falacias y valores de verdad.",
+    "keywords": ["filosofía", "lógica", "paradoja", "silogismo", "falacia", "razonamiento"],
+    "requiere_autorizacion": false,
+    "modo": "inline"
+  },
+  "chip_ingeniero_audio": {
+    "descripcion": "Ingeniero de audio y DSP profesional: análisis de tempo BPM, energía RMS, espectro de frecuencias en bajos, medios y agudos.",
+    "keywords": ["audio", "dsp", "bpm", "rms", "espectro", "frecuencia", "ingeniería"],
+    "requiere_autorizacion": false,
+    "modo": "inline"
+  },
+  "chip_investigador": {
+    "descripcion": "Reglas de investigación: descomposición, fuentes verificables y citaciones obligatorias para el agente Investigador-Alpha.",
+    "keywords": ["investigación", "fuentes", "descomposición"],
+    "requiere_autorizacion": false,
+    "modo": "inline"
+  },
+  "chip_linux_master": {
+    "descripcion": "Administración avanzada de Linux y servicios de red empresariales: troubleshooting de redes, configuración de servicios, seguridad operativa.",
+    "keywords": ["linux", "networking", "sysadmin", "servicios", "red", "shell", "bash"],
+    "requiere_autorizacion": false,
+    "modo": "rag"
+  },
+  "chip_red_team": {
+    "descripcion": "Análisis de vulnerabilidades y pentesting autorizado: encontrar exploits, debilidades en sistemas de control y bypass de restricciones de software.",
+    "keywords": ["pentest", "red team", "exploit", "vulnerabilidad", "bypass", "auditoría de seguridad"],
+    "requiere_autorizacion": true,
+    "modo": "inline"
+  },
+  "chip_teoria_acordes": {
+    "descripcion": "Teoría de acordes y notas musicales: frecuencias de notas, detección de acordes con chroma_cqt e interpretación de letras.",
+    "keywords": ["acordes", "notas", "frecuencia", "chroma", "música"],
+    "requiere_autorizacion": false,
+    "modo": "inline"
+  },
+  "chip_teoria_musical": {
+    "descripcion": "Teoría musical avanzada extraída de libros de referencia: armonía, contrapunto, formas musicales, análisis estructural.",
+    "keywords": ["música", "armonía", "contrapunto", "teoría musical", "análisis", "composición"],
+    "requiere_autorizacion": false,
+    "modo": "rag"
+  },
+  "chip_tester": {
+    "descripcion": "Reglas de evaluación de código ejecutado para el agente Tester-Y.",
+    "keywords": ["test", "qa", "evaluación", "tester"],
+    "requiere_autorizacion": false,
+    "modo": "inline"
+  },
+  "chip_vocal_siri": {
+    "descripcion": "Interfaz vocal para Siri y TTS: respuestas concisas en lenguaje natural sin Markdown, optimizadas para síntesis de voz.",
+    "keywords": ["voz", "siri", "tts", "audio", "vocal", "habla"],
+    "requiere_autorizacion": false,
+    "modo": "inline"
+  },
+  "guia_lectura_epub": {
+    "descripcion": "Patrón para leer archivos EPUB en Python usando ebooklib y BeautifulSoup.",
+    "keywords": ["epub", "ebook", "lectura", "ebooklib", "beautifulsoup"],
+    "requiere_autorizacion": false,
+    "modo": "inline"
+  }
+}
