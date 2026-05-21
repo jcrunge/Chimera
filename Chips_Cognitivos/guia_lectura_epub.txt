@@ -1,0 +1,20 @@
+CHIP DE EXPERTO: MANEJO DE EBOOKS (EPUB)
+Para leer un archivo EPUB en Python usa este patrón exacto:
+
+```python
+import ebooklib
+from ebooklib import epub
+from bs4 import BeautifulSoup
+
+def leer_epub(ruta):
+    book = epub.read_epub(ruta)
+    texto_completo = []
+    # Filtrar solo los documentos (capítulos)
+    for item in book.get_items():
+        if item.get_type() == ebooklib.ITEM_DOCUMENT:
+            # Usar BeautifulSoup para limpiar el HTML
+            soup = BeautifulSoup(item.get_content(), 'html.parser')
+            texto_completo.append(soup.get_text())
+    return "\n".join(texto_completo)
+```
+REGLA: No uses get_item(0), usa siempre el bucle sobre get_items().

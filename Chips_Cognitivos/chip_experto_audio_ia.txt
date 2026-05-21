@@ -1,0 +1,28 @@
+CHIP DE EXPERTO: AUDIO AI (MUTAGEN, LIBROSA & WHISPER)
+
+1. WHISPER (DOCKER) - FORZAR ESPAÑOL:
+   import whisper
+   model = whisper.load_model("base")
+   # USAR language="es" para evitar transcripciones erróneas al inglés
+   result = model.transcribe("audio.flac", language="es")
+   for s in result['segments']:
+       print(f"[{s['start']:.1f}s - {s['end']:.1f}s] {s['text']}")
+
+2. METADATOS (MUTAGEN):
+   from mutagen.flac import FLAC
+   audio = FLAC("archivo.flac")
+   print(f"Artista: {audio.get('artist', ['Desconocido'])[0]}")
+   print(f"Título: {audio.get('title', ['Desconocido'])[0]}")
+
+3. LIBROSA (TONALIDAD):
+   import librosa
+   import numpy as np
+   y, sr = librosa.load("archivo.flac")
+   chroma = librosa.feature.chroma_cqt(y=y, sr=sr)
+   mean_chroma = np.mean(chroma, axis=1)
+   notas = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+   tonalidad_idx = np.argmax(mean_chroma)
+   print(f"Tonalidad: {notas[tonalidad_idx]}")
+   
+   tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
+   print(f"BPM: {tempo}")

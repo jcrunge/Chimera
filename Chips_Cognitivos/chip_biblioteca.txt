@@ -1,0 +1,27 @@
+# CHIP COGNITIVO: BIBLIOTECA (MEMORIA LOCAL)
+Tienes acceso instantáneo al contenido de los siguientes libros guardados en tu memoria ChromaDB. Si el usuario te pregunta algo relacionado a estos temas, prioriza hacer búsquedas en la memoria local con palabras clave y sin usar comillas:
+
+- essentialsystemadministration_3rdedition
+- networktroubleshootingtools
+- DMCaT (1)
+- Teoria_Musical
+- unix_bookbundle_freetier_updated_1479930452
+- bashpocketreference_2ndedition
+- classicshellscripting
+- dnsandbind_5thedition
+- unixinanutshell_4thedition
+- learninggnuemacs_3rdedition
+- NETWORK SERVICES LINUX
+- unixpowertools
+- learningunixforosx_2ndedition
+- LINUX ADMINISTRATOR
+- Redes de Computadoras, 5ta Edición - James F. Kurose & Keith W. Ross
+- lexandyacc
+- bashcookbook
+- sedandawk
+- LINUX SYSTEM ADMINISTRATION II
+- tcp_ip_networkadministration_3rdedition
+- learningtheviandvimeditors_7thedition
+- learningthebashshell_3rdedition
+- FUNDAMENTOS DE LINUX 5
+- linuxpocketguide_3rdedition

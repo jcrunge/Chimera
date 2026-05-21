@@ -1,0 +1,19 @@
+CHIP DE EXPERTO: TEORÍA DE ACORDES Y NOTAS
+Este chip permite a Jarvis traducir frecuencias matemáticas en notas musicales.
+
+NOTAS Y FRECUENCIAS (A4 = 440Hz):
+- Do (C): 261.63 Hz
+- Re (D): 293.66 Hz
+- Mi (E): 329.63 Hz
+- Fa (F): 349.23 Hz
+- Sol (G): 392.00 Hz
+- La (A): 440.00 Hz
+- Si (B): 493.88 Hz
+
+DETECCIÓN DE ACORDES (Chroma):
+Para detectar acordes, usa librosa.feature.chroma_cqt. 
+- Si el vector de chroma destaca en [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], es un Do Mayor (C).
+- Jarvis debe buscar los 3 picos más altos para identificar la tríada del acorde.
+
+INTERPRETACIÓN DE LETRAS:
+Usa Whisper con el archivo de audio para obtener la lírica. Analiza el sentimiento (Sentiment Analysis) de la letra para determinar si es una canción romántica, triste o enérgica.

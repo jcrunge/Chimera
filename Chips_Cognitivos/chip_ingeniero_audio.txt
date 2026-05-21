@@ -1,0 +1,16 @@
+CHIP DE EXPERTO: INGENIERÍA DE AUDIO Y DSP
+Este chip contiene las directivas para analizar señales de audio de forma profesional.
+
+DIRECTIVAS DE ANÁLISIS:
+1. PERCEPCIÓN DE RITMO: El tempo (BPM) se calcula con librosa.beat.beat_track. Un BPM de 100-120 suele ser Groove/Dance, >130 es energía alta, <90 es Chill/Balada.
+2. ENERGÍA RMS: Representa el volumen percibido. Valores cercanos a 0.2 son potentes y comerciales. Valores <0.1 son dinámicos o suaves.
+3. ESPECTRO DE FRECUENCIAS:
+   - Bajos (<250Hz): El "punch" y el cuerpo.
+   - Medios (250Hz-4kHz): Donde vive la voz y la definición.
+   - Agudos (>4kHz): El brillo y la claridad.
+
+FÓRMULAS CLAVE (Python):
+- Cargar: librosa.load(path, sr=None)
+- Tempo: tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
+- RMS: np.sqrt(np.mean(y**2))
+- Espectrograma: librosa.feature.melspectrogram(y=y, sr=sr)
