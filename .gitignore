@@ -50,7 +50,7 @@ Biblioteca/
 workspace/
 
 # API server logs
-/tmp/jarvis_api*.log
+/tmp/chimera_api*.log
 
 # Model cache (from HuggingFace Hub)
 ~/.cache/huggingface/

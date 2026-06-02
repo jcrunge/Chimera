@@ -21,14 +21,14 @@
 **Objetivo:** 2-3× speedup, +30% tasa de éxito sin cambiar arquitectura
 
 ### 1.1 Cambiar modelo Coder a Qwen2.5-Coder-7B
-**Archivo:** `config_jarvis.json`
+**Archivo:** `config_chimera.json`
 **Cambios:**
 - Agregar nuevo campo `"modelo_coder": "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit"`
 - Mantener `modelo_orquestador` y `modelo_worker` como están
 
 **Archivo:** `harness.py` (líneas ~84-87)
 **Cambios:**
-- En `JarvisHarness.__init__()`: cargar 3 modelos en lugar de 2
+- En `ChimeraHarness.__init__()`: cargar 3 modelos en lugar de 2
   ```python
   self.modelo_orquestador = cargar_modelo(config["modelo_orquestador"])
   self.modelo_worker = cargar_modelo(config["modelo_worker"])
@@ -226,7 +226,7 @@ if self._extraer_resultado(resultado) is None:
 - Si llega al límite, devolver con flag "verificación parcial"
 - Eliminar sistema de "penalización en hallazgos" que solo infla contexto
 
-**Archivo:** `config_jarvis.json`
+**Archivo:** `config_chimera.json`
 ```json
 "max_iteraciones_investigacion": 2
 ```
@@ -300,7 +300,7 @@ python bench.py simple   # Solo tareas SIMPLE
 ```python
 def log_inference(agente, prompt_tokens, response_tokens, latencia, modelo, exito):
     fecha = datetime.now().strftime("%Y-%m-%d")
-    ruta = f"logs/jarvis_{fecha}.jsonl"
+    ruta = f"logs/chimera_{fecha}.jsonl"
     entrada = {
         "timestamp": datetime.now().isoformat(),
         "agente": agente,
@@ -333,7 +333,7 @@ log_inference(
 ---
 
 ### 4.4 Comando de diagnóstico
-**Archivo:** `harness.py` en `JarvisHarness`
+**Archivo:** `harness.py` en `ChimeraHarness`
 **Cambios:**
 ```python
 def diagnosticar(self):

@@ -1,6 +1,6 @@
 # Changelog
 
-Todos los cambios notables del proyecto **Sistema de Jarvis** serán documentados en este archivo.
+Todos los cambios notables del proyecto **Chimera** serán documentados en este archivo.
 
 ## [v0.4.0] - Biblioteca de Chips Swappable + Protocolo Estructurado
 
@@ -13,7 +13,7 @@ Todos los cambios notables del proyecto **Sistema de Jarvis** serán documentado
 ### Modificado (Changed)
 - **Protocolo estructurado de evaluadores**: `tester`, `citation` y `investigador` ahora terminan su salida con `<resultado>EXITO|FALLO|INCOMPLETO</resultado>`. El harness parsea ese token con `_extraer_resultado()` en vez de hacer matching por substring. Esto cierra la contradicción documentada en `CLAUDE.md` (`EXITO` vs `EXITO_TOTAL`).
 - **`crear_neurona(tipo, chips_extra=None, tarea_contextual="")`**: nuevo parámetro `chips_extra` para layer de chips encima del chip base sin romper el comportamiento por defecto.
-- **`config_jarvis.json`**: nuevos campos `umbral_chip_normal`, `umbral_chip_autorizado`, `max_chips_por_paso`.
+- **`config_chimera.json`**: nuevos campos `umbral_chip_normal`, `umbral_chip_autorizado`, `max_chips_por_paso`.
 
 ---
 
@@ -28,7 +28,7 @@ Todos los cambios notables del proyecto **Sistema de Jarvis** serán documentado
 - **UI Premium**: Integración de la librería `rich` en todos los scripts para mejorar la legibilidad y estética de la terminal.
 
 ### Modificado (Changed)
-- **Base de Datos Vectorial**: Se migró de la memoria temporal simulada en `Jarvis.py` a una implementación robusta y centralizada usando `ChromaDB` (Sinapsis Compartida).
+- **Base de Datos Vectorial**: Se migró de la memoria temporal simulada en `chimera_legacy.py` a una implementación robusta y centralizada usando `ChromaDB` (Sinapsis Compartida).
 
 ---
 
@@ -38,4 +38,4 @@ Todos los cambios notables del proyecto **Sistema de Jarvis** serán documentado
 - Bucle Cognitivo ReAct básico (Observación -> Pensamiento -> Acción).
 - Integración de `mlx-lm` para ejecución ultra-rápida del modelo Llama-3.2-3B en hardware Apple Silicon (M4).
 - Sistema de Archivos Virtual (Simulado vía diccionario Python) para probar permisos y manejo de errores estáticos.
-- Creación del archivo `Jarvis.py`.
+- Creación del archivo `chimera_legacy.py`.

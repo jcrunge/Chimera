@@ -25,7 +25,7 @@ def buscar_conocimiento(query, n=3):
 # ==========================================
 # 2. EL CEREBRO
 # ==========================================
-CONFIG_FILE = "config_jarvis.json"
+CONFIG_FILE = "config_chimera.json"
 def cargar_config():
     defaults = {"modelo": "mlx-community/Llama-3.2-3B-Instruct-4bit", "max_tokens_pensamiento": 1500, "temperatura": 0.1}
     if os.path.exists(CONFIG_FILE):
@@ -73,7 +73,7 @@ Eres {self.nombre}, {self.rol}.
 # 4. BUCLE DE AUTO-CORRECCIÓN
 # ==========================================
 def ejecutar_red_neuronal(tarea, max_intentos=3):
-    console.print("\n[bold reverse white]  >>> JARVIS NEURAL ENGINE ACTIVE <<<  [/bold reverse white]\n")
+    console.print("\n[bold reverse white]  >>> CHIMERA NEURAL ENGINE ACTIVE <<<  [/bold reverse white]\n")
     
     if "mlx-whisper" in tarea.lower() or "mlx_whisper" in tarea.lower():
         tarea = tarea.replace("mlx-whisper", "whisper").replace("mlx_whisper", "whisper")

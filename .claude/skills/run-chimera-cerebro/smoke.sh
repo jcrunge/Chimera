@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# smoke.sh — Jarvis Cerebro smoke test
-# Usage: bash .claude/skills/run-jarvis-cerebro/smoke.sh
+# smoke.sh — Chimera Cerebro smoke test
+# Usage: bash .claude/skills/run-chimera-cerebro/smoke.sh
 # Requires: API server already running on port 5555
 
 set -euo pipefail
 
 BASE="http://localhost:5555"
 
-echo "=== Jarvis API Smoke Test ==="
+echo "=== Chimera API Smoke Test ==="
 
 # 1. Health check
 echo -n "[1] GET /  ... "

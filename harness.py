@@ -1,5 +1,5 @@
 """
-JarvisHarness v0.3 — Orquestador principal del sistema multi-agente.
+ChimeraHarness v0.3 — Orquestador principal del sistema multi-agente.
 
 Este módulo coordina todas las neuronas, herramientas y flujos de trabajo.
 Reemplaza a motor_neuronal.py.
@@ -30,10 +30,10 @@ console = Console()
 # ==========================================
 # CONFIGURACIÓN
 # ==========================================
-CONFIG_FILE = "config_jarvis.json"
+CONFIG_FILE = "config_chimera.json"
 
 def cargar_config():
-    """Carga la configuración desde config_jarvis.json."""
+    """Carga la configuración desde config_chimera.json."""
     defaults = {
         "modelo_orquestador": "mlx-community/Qwen2.5-7B-Instruct-4bit",
         "modelo_worker": "mlx-community/Llama-3.2-3B-Instruct-4bit",
@@ -55,16 +55,16 @@ def cargar_config():
     return defaults
 
 
-class JarvisHarness:
+class ChimeraHarness:
     """
-    Orquestador principal del sistema Jarvis.
+    Orquestador principal del sistema Chimera.
     
     Gestiona el ciclo completo:
     Router → Planificación → Ejecución → Evaluación → Síntesis → Citación
     """
     
     def __init__(self):
-        console.print("\n[bold reverse white]  >>> JARVIS HARNESS v0.3 INICIANDO <<<  [/bold reverse white]\n")
+        console.print("\n[bold reverse white]  >>> CHIMERA HARNESS v0.3 INICIANDO <<<  [/bold reverse white]\n")
         self.config = cargar_config()
         
         # Cargar modelos
@@ -472,14 +472,14 @@ if __name__ == "__main__":
     import multiprocessing as mp
     mp.set_start_method("spawn", force=True)
 
-    parser = argparse.ArgumentParser(description="Jarvis Harness v0.3")
+    parser = argparse.ArgumentParser(description="Chimera Harness v0.3")
     parser.add_argument("tarea", type=str, nargs='?', default=None, 
                         help="Tarea a procesar")
     parser.add_argument("--interactivo", "-i", action="store_true",
                         help="Modo interactivo (bucle de conversación)")
     args = parser.parse_args()
     
-    harness = JarvisHarness()
+    harness = ChimeraHarness()
     
     if args.interactivo or not args.tarea:
         # Modo interactivo

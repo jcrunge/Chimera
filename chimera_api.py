@@ -3,12 +3,12 @@ from pydantic import BaseModel
 from typing import Optional
 import uvicorn
 import os
-from harness import JarvisHarness
+from harness import ChimeraHarness
 
-app = FastAPI(title="Jarvis Neural API", description="Interfaz para conectar el cerebro de Jarvis con sistemas externos")
+app = FastAPI(title="Chimera Neural API", description="Interfaz para conectar el cerebro de Chimera con sistemas externos")
 
 # Instancia única del orquestador principal
-harness = JarvisHarness()
+harness = ChimeraHarness()
 
 # Modelo de datos para las peticiones
 class TareaRequest(BaseModel):
@@ -18,12 +18,12 @@ class TareaRequest(BaseModel):
 
 @app.get("/")
 def home():
-    return {"status": "online", "message": "Jarvis Neural API is running"}
+    return {"status": "online", "message": "Chimera Neural API is running"}
 
 @app.post("/pensar")
 async def pensar(request: TareaRequest):
     """
-    Endpoint principal para enviar tareas a Jarvis.
+    Endpoint principal para enviar tareas a Chimera.
     """
     try:
         # Preparamos la tarea si hay un archivo involucrado
@@ -38,7 +38,7 @@ async def pensar(request: TareaRequest):
 
         # Ejecutamos el flujo correspondiente a través del orquestador genérico
         res = harness.procesar(tarea_final)
-        
+
         return {
             "exito": res["exito"],
             "resultado_final": res["resultado"],
@@ -89,14 +89,14 @@ async def siri(request: TareaRequest):
         if os.path.exists(chip_vocal_path):
             with open(chip_vocal_path, "r") as f:
                 contexto_vocal = f.read()
-        
+
         # Buscar contexto relevante en la memoria local
         from herramientas import buscar_memoria
         contexto_rag = buscar_memoria(request.tarea)
-        
+
         # Formular el prompt para Siri
         prompt = f"REGLAS VOCALES:\n{contexto_vocal}\n\nCONOCIMIENTO ADICIONAL:\n{contexto_rag}"
-        
+
         # Generar respuesta concisa usando la neurona sintetizadora
         respuesta = harness.sintetizador.pensar(request.tarea, contexto=prompt, max_tokens=150)
         return respuesta

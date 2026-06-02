@@ -6,7 +6,7 @@ from rich.console import Console
 console = Console()
 
 class DockerSandbox:
-    def __init__(self, image="python:3.11-slim", container_name="jarvis_sandbox", deps_extra=None):
+    def __init__(self, image="python:3.11-slim", container_name="chimera_sandbox", deps_extra=None):
         self.client = docker.from_env()
         self.image = image
         self.container_name = container_name

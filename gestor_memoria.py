@@ -109,7 +109,7 @@ def reiniciar_memoria():
         try:
             if os.path.exists(DB_PATH):
                 shutil.rmtree(DB_PATH)
-                console.print("[bold green]✅ Memoria borrada con éxito. Jarvis no recordará nada la próxima vez.[/bold green]")
+                console.print("[bold green]✅ Memoria borrada con éxito. Chimera no recordará nada la próxima vez.[/bold green]")
             else:
                 console.print("[yellow]La base de datos no existe actualmente.[/yellow]")
         except Exception as e:
@@ -119,7 +119,7 @@ def reiniciar_memoria():
 
 if __name__ == "__main__":
     while True:
-        console.print("\n[bold reverse white]  >>> PANEL DE CONTROL PSICOLÓGICO DE JARVIS <<<  [/bold reverse white]")
+        console.print("\n[bold reverse white]  >>> PANEL DE CONTROL PSICOLÓGICO DE CHIMERA <<<  [/bold reverse white]")
         console.print("1. Ver cantidad de recuerdos (Estado)")
         console.print("2. Leer los recuerdos detallados (Lista)")
         console.print("3. Borrar un recuerdo específico (Cirugía de memoria)")

@@ -1,4 +1,4 @@
-# 🌌 Sistema de Jarvis: Red Neuronal Multi-Agente
+# 🌌 Sistema de Chimera: Red Neuronal Multi-Agente
 
 > **Arquitectura de Inteligencia Artificial Autónoma integrada a nivel de sistema operativo. Diseñada con latencia ultra-baja para hardware Apple Silicon, utilizando RAG (ChromaDB), Ejecución Segura (Docker) y Auto-Corrección Recursiva.**
 
@@ -6,7 +6,7 @@
 
 ## 🚀 Resumen del Proyecto
 
-El **Sistema de Jarvis** ha evolucionado de un simple script a un **Clúster Neuronal Multi-Agente**. En lugar de tener un solo modelo de lenguaje, Jarvis se divide en "Neuronas" especializadas (ej. Programador, Tester, Asimilador) que comparten una memoria central y trabajan en equipo para resolver tareas complejas.
+El **Sistema de Chimera** ha evolucionado de un simple script a un **Clúster Neuronal Multi-Agente**. En lugar de tener un solo modelo de lenguaje, Chimera se divide en "Neuronas" especializadas (ej. Programador, Tester, Asimilador) que comparten una memoria central y trabajan en equipo para resolver tareas complejas.
 
 El sistema no solo genera código, sino que lo **ejecuta en un Sandbox real**, evalúa los resultados, y si falla, **se auto-corrige** iterativamente hasta tener éxito.
 
@@ -33,7 +33,7 @@ Implementación avanzada de agentes especializados que colaboran entre sí.
 - **Script responsable:** `motor_neuronal.py`
 
 ### 4. 🌐 El Asimilador (Aprendizaje Externo)
-Permite a Jarvis aprender de internet bajo demanda.
+Permite a Chimera aprender de internet bajo demanda.
 - Extrae el HTML de cualquier URL, elimina la basura (scripts, estilos) y lo convierte a **Markdown puro**.
 - Lo inyecta matemáticamente en la base de datos vectorial para que las Neuronas lo usen en el futuro.
 - **Script responsable:** `asimilador_web.py`
@@ -55,8 +55,8 @@ Permite a Jarvis aprender de internet bajo demanda.
 - `motor_neuronal.py`: **[NÚCLEO]** Orquestador multi-agente y bucle de auto-corrección.
 - `docker_sandbox.py`: Controlador de los contenedores para ejecución segura.
 - `asimilador_web.py`: Script para inyectar conocimiento (URLs) a la memoria.
-- `gestor_memoria.py`: **Panel de Control Psicológico**. Permite ver, auditar y borrar los recuerdos vectoriales de Jarvis.
-- `Jarvis.py`: (Legacy) Prueba de concepto original con sandbox simulado.
+- `gestor_memoria.py`: **Panel de Control Psicológico**. Permite ver, auditar y borrar los recuerdos vectoriales de Chimera.
+- `chimera_legacy.py`: (Legacy) Prueba de concepto original con sandbox simulado.
 
 ## 🚦 Cómo Ejecutar el Motor Principal
 
@@ -65,7 +65,7 @@ Permite a Jarvis aprender de internet bajo demanda.
    ```bash
    python motor_neuronal.py
    ```
-3. (Opcional) Para alimentar a Jarvis con nueva información de internet:
+3. (Opcional) Para alimentar a Chimera con nueva información de internet:
    ```bash
    python asimilador_web.py
    ```

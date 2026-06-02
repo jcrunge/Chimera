@@ -1,5 +1,5 @@
 """
-Herramientas disponibles para el Harness de Jarvis.
+Herramientas disponibles para el Harness de Chimera.
 Cada función es un wrapper simple que las Neuronas pueden usar.
 """
 import os
@@ -20,7 +20,7 @@ def obtener_coleccion():
 
 def buscar_memoria(query, n=3):
     """
-    Busca en la memoria vectorial de Jarvis.
+    Busca en la memoria vectorial de Chimera.
     
     Args:
         query: Texto a buscar.
@@ -53,7 +53,7 @@ def guardar_en_memoria(texto, metadata=None, doc_id=None):
     import time
     coleccion = obtener_coleccion()
     doc_id = doc_id or f"harness_{int(time.time())}"
-    metadata = metadata or {"autor": "JarvisHarness"}
+    metadata = metadata or {"autor": "ChimeraHarness"}
     coleccion.add(documents=[texto], metadatas=[metadata], ids=[doc_id])
     console.print(f"[green]💾 Guardado en memoria: {doc_id}[/green]")
 

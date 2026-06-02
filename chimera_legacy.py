@@ -50,7 +50,7 @@ def asimilar_chips():
 
 def memorizar_hallazgo(objetivo, contenido):
     id_memoria = f"recuerdo_{int(time.time())}_{objetivo}"
-    texto_memoria = f"Experiencia de Jarvis: Al analizar '{objetivo}', aprendí: {contenido}"
+    texto_memoria = f"Experiencia de Chimera: Al analizar '{objetivo}', aprendí: {contenido}"
     
     coleccion_memoria.add(
         documents=[texto_memoria],
@@ -64,9 +64,9 @@ def memorizar_hallazgo(objetivo, contenido):
 # ==========================================
 def cargar_config():
     defaults = {"modelo": "mlx-community/Llama-3.2-3B-Instruct-4bit", "max_tokens": 250, "temp": 0.7}
-    if os.path.exists("config_jarvis.json"):
+    if os.path.exists("config_chimera.json"):
         try:
-            with open("config_jarvis.json", "r") as f:
+            with open("config_chimera.json", "r") as f:
                 c = json.load(f)
                 return {"modelo": c.get("modelo", defaults["modelo"]), 
                         "max_tokens": c.get("max_tokens_pensamiento", defaults["max_tokens"]),
@@ -111,7 +111,7 @@ def fase_de_pensamiento(archivos_visibles, objetivo):
     contexto = "\n".join(resultados['documents'][0]) if resultados['documents'][0] else "Sin recuerdos previos."
 
     prompt = f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
-Eres Jarvis, un sistema de IA experto y analítico. Responde siempre en español.
+Eres Chimera, un sistema de IA experto y analítico. Responde siempre en español.
 Usa la información de la MEMORIA RECUPERADA (que puede incluir guías de experto o chips de conocimiento) para realizar un análisis profundo.
 MEMORIA RECUPERADA:
 {contexto}
@@ -126,7 +126,7 @@ Entorno: {archivos_visibles}.
 # 4. BUCLE COGNITIVO (UI MEJORADA)
 # ==========================================
 def motor_cognitivo(entorno):
-    console.print("\n[bold reverse white]  >>> SISTEMA DE JARVIS ONLINE <<<  [/bold reverse white]\n")
+    console.print("\n[bold reverse white]  >>> SISTEMA DE CHIMERA ONLINE <<<  [/bold reverse white]\n")
     
     archivos = entorno.observar_entorno()
     for ciclo, objetivo in enumerate(archivos):
@@ -139,7 +139,7 @@ def motor_cognitivo(entorno):
         with console.status("[bold magenta]Procesando pensamientos...[/bold magenta]"):
             pensamiento = fase_de_pensamiento(archivos, objetivo)
         
-        console.print(Panel(f"[italic cyan]\"{pensamiento}\"[/italic cyan]", title="🧠 Jarvis: Pensamiento", border_style="cyan"))
+        console.print(Panel(f"[italic cyan]\"{pensamiento}\"[/italic cyan]", title="🧠 Chimera: Pensamiento", border_style="cyan"))
 
         # 3. ACCIÓN
         console.print(f"[bold yellow]⚙️ ACCIÓN:[/bold yellow] Intentando lectura de [bold]{objetivo}[/bold]...")

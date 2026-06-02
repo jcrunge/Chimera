@@ -1,13 +1,13 @@
 ---
-name: run-jarvis-cerebro
-description: Run, start, launch, test, or smoke-test the Jarvis multi-agent AI system. Covers the FastAPI server (jarvis_api.py), interactive harness CLI (harness.py), and smoke testing live endpoints with curl.
+name: run-chimera-cerebro
+description: Run, start, launch, test, or smoke-test the Chimera multi-agent AI system. Covers the FastAPI server (chimera_api.py), interactive harness CLI (harness.py), and smoke testing live endpoints with curl.
 ---
 
-Jarvis Cerebro is a local multi-agent AI system on Apple Silicon (MLX). It exposes a **FastAPI server** on port 5555, an **interactive CLI harness**, and several utility scripts. The agent path is curl-based smoke testing against the live API. Paths below are relative to the repo root.
+Chimera Cerebro is a local multi-agent AI system on Apple Silicon (MLX). It exposes a **FastAPI server** on port 5555, an **interactive CLI harness**, and several utility scripts. The agent path is curl-based smoke testing against the live API. Paths below are relative to the repo root.
 
 ## Prerequisites
 
-- Docker Desktop must be running before any `harness.py` or `jarvis_api.py` invocation that hits the CODIGO flow (spawns `DockerSandbox`).
+- Docker Desktop must be running before any `harness.py` or `chimera_api.py` invocation that hits the CODIGO flow (spawns `DockerSandbox`).
 - Python venv at `.venv/` — always activate first.
 - Models are cached in `~/.cache/huggingface/` after first download; first startup fetches ~4 GB.
 
@@ -21,7 +21,7 @@ source .venv/bin/activate
 
 ```bash
 source .venv/bin/activate
-python -m uvicorn jarvis_api:app --host 0.0.0.0 --port 5555 &
+python -m uvicorn chimera_api:app --host 0.0.0.0 --port 5555 &
 ```
 
 **Wait until ready:**
@@ -34,7 +34,7 @@ echo "ready"
 **Run the smoke test** (all three endpoints):
 
 ```bash
-bash .claude/skills/run-jarvis-cerebro/smoke.sh
+bash .claude/skills/run-chimera-cerebro/smoke.sh
 ```
 
 The smoke script (`smoke.sh`) tests:
@@ -93,7 +93,7 @@ python asimilador_web.py
 python gestor_memoria.py
 
 # Voice interface (requires microphone; needs API server running on :5555)
-python jarvis_voz.py
+python chimera_voz.py
 ```
 
 ## Direct invocation (no model load)

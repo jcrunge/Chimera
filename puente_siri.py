@@ -5,9 +5,9 @@ import json
 # Configuración de la API local
 API_URL = "http://localhost:5555/siri"
 
-def consultar_jarvis(pregunta):
+def consultar_chimera(pregunta):
     """
-    Se conecta a la API de Jarvis que ya tiene el modelo en memoria.
+    Se conecta a la API de Chimera que ya tiene el modelo en memoria.
     Esto permite una respuesta instantánea para Siri.
     """
     try:
@@ -20,7 +20,7 @@ def consultar_jarvis(pregunta):
         else:
             return f"Error de conexión con el motor neuronal: {response.status_code}"
     except Exception as e:
-        return f"Jarvis no está disponible en este momento, señor. (Error: {str(e)})"
+        return f"Chimera no está disponible en este momento, señor. (Error: {str(e)})"
 
 if __name__ == "__main__":
     # Soporte para argumentos (Siri envía el texto aquí)
@@ -31,6 +31,6 @@ if __name__ == "__main__":
         entrada_usuario = input("Dime algo: ").strip()
 
     if entrada_usuario:
-        print(consultar_jarvis(entrada_usuario))
+        print(consultar_chimera(entrada_usuario))
     else:
-        print("Jarvis está listo. ¿En qué puedo ayudarle?")
+        print("Chimera está listo. ¿En qué puedo ayudarle?")
